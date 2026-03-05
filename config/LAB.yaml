@@ -67,7 +67,7 @@ labs:
       - col(lab_category)
       - col(reference_unit)
       - col(lab_order_category)
-    time: col(lab_collect_dttm)
+    time: col(lab_result_dttm)
     time_format: "%Y-%m-%d %H:%M:%S"
     numeric_value: lab_value_numeric
     text_value: lab_value
