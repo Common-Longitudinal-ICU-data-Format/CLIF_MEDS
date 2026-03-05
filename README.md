@@ -32,31 +32,34 @@ Every clinical event code follows the pattern:
 Examples:
 
 ```
-VITAL//heart_rate//NA
-LAB//creatinine//mg/dL//bmp
-MED_CON//norepinephrine//UNK//start
-RESP//peep//cmH2O//set
+VITAL//spo2
+LAB//bicarbonate//mmol/L//bmp
+MED_CON//dexmedetomidine//mcg/kg/hr//start
+MED_INT//vancomycin//dose//given
+HOSP_DX//ICD10CM//N186
 ```
+
+Explore all possible codes in the [mCIDE explorer](https://clif-icu.com/mcide-explorer).
 
 ## Domains
 
 | Domain | Prefix | Levels | Example |
 |---|---|---|---|
-| Vitals | `VITAL//` | 2 | `VITAL//heart_rate//NA` |
-| Labs | `LAB//` | 3 | `LAB//creatinine//mg/dL//bmp` |
-| Meds (continuous) | `MED_CON//` | 3 | `MED_CON//norepinephrine//UNK//start` |
-| Meds (intermittent) | `MED_INT//` | 3 | `MED_INT//vancomycin//mg//given` |
-| Respiratory | `RESP//` | 3 | `RESP//peep//cmH2O//set` |
-| Patient Assessments | `PA//` | 1 | `PA//gcs_total` |
-| Code Status | `CODE_STATUS//` | 1 | `CODE_STATUS//full_code` |
-| Hospitalization | `HOSP//` | 3 | `HOSP//admission_type//emergency//NA` |
+| Vitals | `VITAL//` | 1 | `VITAL//spo2` |
+| Labs | `LAB//` | 3 | `LAB//bicarbonate//mmol/L//bmp` |
+| Meds (continuous) | `MED_CON//` | 3 | `MED_CON//dexmedetomidine//mcg/kg/hr//start` |
+| Meds (intermittent) | `MED_INT//` | 3 | `MED_INT//vancomycin//dose//given` |
+| Respiratory | `RESP//` | 2 | `RESP//device_category//imv` |
+| Patient Assessments | `PA//` | 1 | `PA//gcs_verbal` |
+| Code Status | `CODE_STATUS//` | 1 | `CODE_STATUS//full` |
+| Hospitalization | `HOSP//` | 2 | `HOSP//discharge_category//expired` |
 | Demographics | `PATIENT//` | 2 | `PATIENT//sex//female` |
-| ADT | `ADT//` | 3 | `ADT//TRANSFER_IN//icu//neuro_icu` |
+| ADT | `ADT//` | 3 | `ADT//TRANSFER_IN//icu//cvicu_icu` |
 | Position | `POS//` | 1 | `POS//prone` |
-| CRRT | `CRRT//` | 3 | `CRRT//crrt//UNK//presence` |
-| ECMO/MCS | `ECMO_MCS//` | 3 | `ECMO_MCS//ecmo//UNK//start` |
-| Procedures | `PROC//` | 2 | `PROC//CPT//36556` |
-| Hospital Dx | `HOSP_DX//` | 3 | `HOSP_DX//ICD//10//A41` |
+| CRRT | `CRRT//` | 2 | `CRRT//crrt_mode_category//cvvhdf` |
+| ECMO/MCS | `ECMO_MCS//` | 3 | `ECMO_MCS//ecmo_mcs//UNK//presence` |
+| Procedures | `PROC//` | 2 | `PROC//ICD10PCS//02H633Z` |
+| Hospital Dx | `HOSP_DX//` | 2 | `HOSP_DX//ICD10CM//N186` |
 
 HOSP_DX carries post-hoc hospital discharge diagnoses (labels, not real-time features). PROC and HOSP_DX are pass-through domains where codes come from the source data (ICD, CPT/HCPCS).
 
@@ -95,6 +98,7 @@ Models built on ELF-coded MEDS will generalize to any CLIF site's data without c
 - **MEDS**: https://github.com/Medical-Event-Data-Standard/meds
 - **MEDS paper**: https://openreview.net/pdf?id=IsHy2ebjIG
 - **ELF spec**: https://github.com/Common-Longitudinal-ICU-data-Format/ELF
+- **mCIDE explorer**: https://clif-icu.com/mcide-explorer
 - **CLIF**: https://github.com/Common-Longitudinal-ICU-data-Format/CLIF
 - **CLIF paper**: https://link.springer.com/article/10.1007/s00134-025-07848-7
 - **CLIF-MIMIC**: https://github.com/Common-Longitudinal-ICU-data-Format/CLIF-MIMIC
