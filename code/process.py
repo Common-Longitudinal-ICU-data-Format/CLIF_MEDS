@@ -6,7 +6,11 @@ from clifpy.utils.io import load_data
 from tqdm import tqdm
 
 from code.config import _CONFIG_META_KEYS
+from code.process_crrt import process_crrt
+from code.process_ecmo_mcs import process_ecmo_mcs
 from code.process_med_con import process_med_con
+from code.process_med_int import process_med_int
+from code.process_resp import process_resp
 from code.resolve import resolve_code, resolve_time
 from code.transforms import normalize_categories, strip_tz
 
@@ -66,6 +70,15 @@ def _process_domain(config: dict, domain_config: dict, data_dir: Path, output_di
         hosp_df = hosp_df.select(join_cols).unique(subset=["hospitalization_id"])
         df = df.join(hosp_df, on="hospitalization_id", how="left")
 
+    # Outlier shaping: build clamp limits if enabled
+    outlier_cfg = domain_config.get("outlier_shaping", {})
+    clamp_limits = {}
+    clamp_category_col = None
+    if outlier_cfg.get("enabled", False):
+        clamp_category_col = outlier_cfg.get("category_col")
+        for key, bounds in outlier_cfg.get("limits", {}).items():
+            clamp_limits[key] = (float(bounds[0]), float(bounds[1]))
+
     rows = []
     for row_dict in tqdm(df.iter_rows(named=True), total=len(df), desc=f"  {domain_name}"):
         subject_id = row_dict[subject_id_col]
@@ -83,9 +96,16 @@ def _process_domain(config: dict, domain_config: dict, data_dir: Path, output_di
             numeric_value = None
             text_value = None
             if "numeric_value" in mapping:
-                nv = row_dict.get(mapping["numeric_value"])
+                nv_col = mapping["numeric_value"]
+                nv = row_dict.get(nv_col)
                 if nv is not None:
                     numeric_value = float(nv)
+                    if clamp_limits:
+                        # Determine clamp key: category column value or source column name
+                        clamp_key = row_dict.get(clamp_category_col) if clamp_category_col else nv_col
+                        if clamp_key in clamp_limits:
+                            lower, upper = clamp_limits[clamp_key]
+                            numeric_value = max(lower, min(upper, numeric_value))
             if "text_value" in mapping:
                 tv = row_dict.get(mapping["text_value"])
                 if tv is not None:
@@ -154,6 +174,10 @@ def process_proc(config: dict, domain_config: dict, data_dir: Path, output_dir: 
     _process_domain(config, domain_config, data_dir, output_dir, "PROC")
 
 
+def process_pa(config: dict, domain_config: dict, data_dir: Path, output_dir: Path):
+    _process_domain(config, domain_config, data_dir, output_dir, "PA")
+
+
 # Domain dispatcher — maps domain name to processing function
 DOMAIN_PROCESSORS = {
     "PATIENT": process_patient,
@@ -166,4 +190,9 @@ DOMAIN_PROCESSORS = {
     "HOSP_DX": process_hosp_dx,
     "PROC": process_proc,
     "MED_CON": process_med_con,
+    "MED_INT": process_med_int,
+    "RESP": process_resp,
+    "CRRT": process_crrt,
+    "ECMO_MCS": process_ecmo_mcs,
+    "PA": process_pa,
 }

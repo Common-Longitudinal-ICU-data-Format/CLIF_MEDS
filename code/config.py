@@ -4,7 +4,7 @@ from pathlib import Path
 import yaml
 
 # Metadata keys in domain YAML configs (not concept sections)
-_CONFIG_META_KEYS = {"subject_id_col", "elf_version"}
+_CONFIG_META_KEYS = {"subject_id_col", "elf_version", "outlier_shaping"}
 
 
 def load_config(config_path: str) -> dict:

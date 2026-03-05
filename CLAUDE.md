@@ -18,7 +18,7 @@ Every clinical event code follows: `{domain}//{level_1}//{level_2}//{level_3}`
 - `/` (single slash) is reserved for use within values (e.g., `mg/dL`, `mcg/kg/min`)
 - Sentinel values: `NA` = not applicable, `UNK` = unknown
 
-### mCIDE Domains (16 total)
+### mCIDE Domains (15 total)
 
 | Domain | Prefix | Levels used | Example |
 |---|---|---|---|
@@ -36,13 +36,12 @@ Every clinical event code follows: `{domain}//{level_1}//{level_2}//{level_3}`
 | CRRT | `CRRT//` | 3 | `CRRT//crrt//UNK//presence` |
 | ECMO/MCS | `ECMO_MCS//` | 3 | — |
 | Procedures | `PROC//` | 2 | pass-through (CPT/HCPCS) |
-| Patient Dx | `PATIENT_DX//` | 3 | `PATIENT_DX//ICD//10//J96` |
 | Hospital Dx | `HOSP_DX//` | 3 | `HOSP_DX//ICD//10//A41` |
 
 ### Key Design Decisions
 
-- **PATIENT_DX vs HOSP_DX split**: Prevents label leakage in predictive models. PATIENT_DX = available during stay; HOSP_DX = post-hoc discharge labels.
-- **Pass-through domains** (PROC, PATIENT_DX, HOSP_DX): Codes come from source data (ICD, CPT), not from a predefined catalog.
+- **HOSP_DX domain**: Carries post-hoc hospital discharge diagnoses — these are labels, not features available during a stay.
+- **Pass-through domains** (PROC, HOSP_DX): Codes come from source data (ICD, CPT), not from a predefined catalog.
 - **Config-driven conversion**: Per-domain YAML files in `config/concepts/` define how source data maps to ELF codes. User extensions go in `config/extensions/`.
 - **Semantic versioning** per domain config: `concept_version` in `codes.parquet` traces which config version produced each concept.
 

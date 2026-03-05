@@ -1,5 +1,7 @@
 """ETL orchestration — the main pipeline loop."""
 import argparse
+import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -51,4 +53,18 @@ def main():
         DOMAIN_PROCESSORS[domain](config, domain_config, data_dir, output_dir)
 
     write_codes_parquet(output_dir, domain_versions)
+
+    metadata_schema = config.get("DatasetMetadataSchema", {})
+    metadata_schema["other_extension_columns"] = [
+        "hospitalization_id",
+        "event_count",
+        "is_numeric_value",
+        "is_text_value",
+    ]
+    metadata_schema["created_at"] = datetime.now(timezone.utc).isoformat()
+    metadata_path = output_dir / "metadata" / "dataset_metadata.json"
+    with open(metadata_path, "w") as f:
+        json.dump(metadata_schema, f, indent=2)
+    print(f"  dataset_metadata.json -> {metadata_path}")
+
     print("Done.")

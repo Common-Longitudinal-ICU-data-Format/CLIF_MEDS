@@ -9,18 +9,17 @@ domains:
   VITAL: 1
   LAB: 1
   MED_CON: 1
-  MED_INT: 0
-  RESP: 0
-  PA: 0
+  MED_INT: 1
+  RESP: 1
+  PA: 1
   CODE_STATUS: 1
   HOSP: 1
   PATIENT: 1
   ADT: 1
   POS: 1
-  CRRT: 0
-  ECMO_MCS: 0
+  CRRT: 1
+  ECMO_MCS: 1
   PROC: 1
-  PATIENT_DX: 0
   HOSP_DX: 1
 
 subject_id_col: patient_id
@@ -31,3 +30,21 @@ meds:
     train: 0.7
     tuning: 0.15
     held_out: 0.15
+
+DatasetMetadataSchema:
+  dataset_name: "TEST_SITE_MEDS"
+  dataset_version: "1.0.0"
+  etl_name: "CLIF-to-MEDS"
+  etl_version: "0.1.0"
+  meds_version: "0.3.3"
+  data_harmonization_format: "ELF"
+  data_harmonization_version: "1.0.0"
+  created_at: ""
+  license: "private"
+  location_uri: "private"
+  description_uri: "private"
+  raw_source_id_columns: []
+  code_modifier_columns: []
+  additional_value_modality_columns: []
+  site_id_columns: []
+  other_extension_columns: []
