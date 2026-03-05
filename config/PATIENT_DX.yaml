@@ -1,3 +1,4 @@
+elf_version: "1.0.0"
 subject_id_col: patient_id
 
 # NOTE: CLIF does not currently have a patient_diagnosis table.

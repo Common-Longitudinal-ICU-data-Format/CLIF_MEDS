@@ -1,3 +1,4 @@
+elf_version: "1.0.0"
 subject_id_col: patient_id
 
 position:
@@ -7,4 +8,5 @@ position:
       - col(position_category)
     time: col(recorded_dttm)
     time_format: "%Y-%m-%d %H:%M:%S"
+    text_value: position_name
     hospitalization_id: hospitalization_id

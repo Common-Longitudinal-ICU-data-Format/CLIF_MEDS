@@ -1,0 +1,33 @@
+site: TEST_SITE
+data_directory: ./test/clif_demo
+filetype: parquet
+timezone: America/Chicago
+output_directory: ./test/output
+concept_config_directory: ./config
+
+domains:
+  VITAL: 1
+  LAB: 1
+  MED_CON: 1
+  MED_INT: 0
+  RESP: 0
+  PA: 0
+  CODE_STATUS: 1
+  HOSP: 1
+  PATIENT: 1
+  ADT: 1
+  POS: 1
+  CRRT: 0
+  ECMO_MCS: 0
+  PROC: 1
+  PATIENT_DX: 0
+  HOSP_DX: 1
+
+subject_id_col: patient_id
+
+meds:
+  output_format: parquet
+  split_ratios:
+    train: 0.7
+    tuning: 0.15
+    held_out: 0.15

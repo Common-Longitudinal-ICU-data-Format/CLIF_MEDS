@@ -30,7 +30,7 @@ Every clinical event code follows: `{domain}//{level_1}//{level_2}//{level_3}`
 | Patient Assessments | `PA//` | 1 | `PA//gcs_total` |
 | Code Status | `CODE_STATUS//` | 1 | `CODE_STATUS//full_code` |
 | Hospitalization | `HOSP//` | 3 | `HOSP//admission_type//...` |
-| Demographics | `DEMO//` | 2 | `DEMO//sex//female` |
+| Demographics | `PATIENT//` | 2 | `PATIENT//sex//female` |
 | ADT | `ADT//` | 3 | `ADT//TRANSFER_IN//icu//neuro_icu` |
 | Position | `POS//` | 1 | `POS//prone` |
 | CRRT | `CRRT//` | 3 | `CRRT//crrt//UNK//presence` |
