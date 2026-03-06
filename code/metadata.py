@@ -46,12 +46,17 @@ def write_codes_parquet(output_dir: Path, domain_versions: dict[str, str]):
     count_frames: list[pl.DataFrame] = []
 
     for parquet_file in data_dir.glob("*.parquet"):
-        df = pl.read_parquet(parquet_file, columns=["code", "numeric_value", "text_value"])
-        df = df.filter(pl.col("code").is_not_null() & (pl.col("code") != ""))
-        counts = df.group_by("code").agg(
-            pl.len().alias("len"),
-            pl.col("numeric_value").is_not_null().any().alias("has_numeric"),
-            pl.col("text_value").is_not_null().any().alias("has_text"),
+        counts = (
+            pl.scan_parquet(parquet_file)
+            .select("code", "numeric_value", "text_value")
+            .filter(pl.col("code").is_not_null() & (pl.col("code") != ""))
+            .group_by("code")
+            .agg(
+                pl.len().alias("len"),
+                pl.col("numeric_value").is_not_null().any().alias("has_numeric"),
+                pl.col("text_value").is_not_null().any().alias("has_text"),
+            )
+            .collect(streaming=True)
         )
         count_frames.append(counts)
 
@@ -61,6 +66,7 @@ def write_codes_parquet(output_dir: Path, domain_versions: dict[str, str]):
             pl.col("has_numeric").any(),
             pl.col("has_text").any(),
         )
+        del count_frames
     else:
         code_stats = pl.DataFrame(
             {"code": [], "len": [], "has_numeric": [], "has_text": []},
@@ -74,11 +80,13 @@ def write_codes_parquet(output_dir: Path, domain_versions: dict[str, str]):
         pl.col("has_text").cast(pl.Int8).alias("is_text_value"),
     ).drop("len", "has_numeric", "has_text")
 
-    rows = []
     stats_map = {
         row["code"]: row
         for row in code_stats.iter_rows(named=True)
     }
+    del code_stats
+
+    rows = []
     for code_val in sorted(stats_map.keys()):
         domain = code_to_domain(code_val)
         s = stats_map[code_val]

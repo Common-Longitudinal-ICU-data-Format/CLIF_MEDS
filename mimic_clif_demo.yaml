@@ -1,0 +1,51 @@
+site: mimic_demo_full
+data_directory: /Users/sudo_sage/Documents/WORK/clif_mimic
+filetype: parquet
+timezone: US/Eastern
+output_directory: ./clif_meds_mimic
+concept_config_directory: ./config
+
+# Domains: 1 = will be ETL'd, 0 = skip
+domains:
+  VITAL: 1
+  LAB: 1
+  MED_CON: 1
+  MED_INT: 1
+  RESP: 1
+  PA: 1
+  CODE_STATUS: 1
+  HOSP: 1
+  PATIENT: 1
+  ADT: 1
+  POS: 1
+  CRRT: 1
+  ECMO_MCS: 1
+  PROC: 1
+  HOSP_DX: 1
+
+subject_id_col: patient_id
+
+meds:
+  output_format: parquet
+  split_ratios:
+    train: 0.7
+    tuning: 0.15
+    held_out: 0.15
+
+DatasetMetadataSchema:
+  dataset_name: ""
+  dataset_version: ""
+  etl_name: "CLIF-to-MEDS"
+  etl_version: ""
+  meds_version: ""
+  data_harmonization_format: "ELF"
+  data_harmonization_version: "1.0.0"
+  created_at: ""        # auto-populated at runtime
+  license: ""
+  location_uri: ""
+  description_uri: ""
+  raw_source_id_columns: []
+  code_modifier_columns: []
+  additional_value_modality_columns: []
+  site_id_columns: []
+  other_extension_columns: []

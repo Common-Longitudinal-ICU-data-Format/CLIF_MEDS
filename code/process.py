@@ -122,6 +122,9 @@ def _process_domain(config: dict, domain_config: dict, data_dir: Path, output_di
                 row_out["hospitalization_id"] = int(row_dict["hospitalization_id"])
             rows.append(row_out)
 
+    has_hosp_id = "hospitalization_id" in df.columns
+    del df
+
     schema = {
         "subject_id": pl.Int64,
         "time": pl.Datetime,
@@ -129,13 +132,14 @@ def _process_domain(config: dict, domain_config: dict, data_dir: Path, output_di
         "numeric_value": pl.Float32,
         "text_value": pl.Utf8,
     }
-    if domain_name != "PATIENT" and "hospitalization_id" in df.columns:
+    if domain_name != "PATIENT" and has_hosp_id:
         schema["hospitalization_id"] = pl.Int64
     out_df = pl.DataFrame(rows, schema=schema)
 
     out_path = output_dir / "data" / f"{domain_name}.parquet"
     out_df.write_parquet(out_path)
     print(f"  {domain_name} -> {out_path} ({len(out_df)} events)")
+    del rows, out_df
 
 
 def process_patient(config: dict, domain_config: dict, data_dir: Path, output_dir: Path):

@@ -1,5 +1,6 @@
 """ETL orchestration — the main pipeline loop."""
 import argparse
+import gc
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -51,6 +52,7 @@ def main():
 
         print(f"Processing {domain}...")
         DOMAIN_PROCESSORS[domain](config, domain_config, data_dir, output_dir)
+        gc.collect()
 
     write_codes_parquet(output_dir, domain_versions)
 

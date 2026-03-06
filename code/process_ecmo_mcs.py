@@ -27,6 +27,7 @@ def process_ecmo_mcs(config: dict, domain_config: dict, data_dir: Path, output_d
     )
 
     df = strip_tz(pl.from_pandas(ecmo_pdf))
+    del ecmo_pdf
     df = normalize_categories(df)
 
     # Drop unused columns
@@ -106,6 +107,9 @@ def process_ecmo_mcs(config: dict, domain_config: dict, data_dir: Path, output_d
                 row_out["hospitalization_id"] = int(row_dict["hospitalization_id"])
             rows.append(row_out)
 
+    has_hosp_id = "hospitalization_id" in df.columns
+    del df
+
     schema = {
         "subject_id": pl.Int64,
         "time": pl.Datetime,
@@ -113,10 +117,11 @@ def process_ecmo_mcs(config: dict, domain_config: dict, data_dir: Path, output_d
         "numeric_value": pl.Float32,
         "text_value": pl.Utf8,
     }
-    if "hospitalization_id" in df.columns:
+    if has_hosp_id:
         schema["hospitalization_id"] = pl.Int64
     out_df = pl.DataFrame(rows, schema=schema)
 
     out_path = output_dir / "data" / "ECMO_MCS.parquet"
     out_df.write_parquet(out_path)
     print(f"  ECMO_MCS -> {out_path} ({len(out_df)} events)")
+    del rows, out_df

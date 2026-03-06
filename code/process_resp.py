@@ -27,6 +27,7 @@ def process_resp(config: dict, domain_config: dict, data_dir: Path, output_dir: 
     )
 
     df = strip_tz(pl.from_pandas(resp_pdf))
+    del resp_pdf
     df = normalize_categories(df)
 
     # Drop vent_brand_name entirely
@@ -113,6 +114,9 @@ def process_resp(config: dict, domain_config: dict, data_dir: Path, output_dir: 
                 row_out["hospitalization_id"] = int(row_dict["hospitalization_id"])
             rows.append(row_out)
 
+    has_hosp_id = "hospitalization_id" in df.columns
+    del df
+
     schema = {
         "subject_id": pl.Int64,
         "time": pl.Datetime,
@@ -120,10 +124,11 @@ def process_resp(config: dict, domain_config: dict, data_dir: Path, output_dir: 
         "numeric_value": pl.Float32,
         "text_value": pl.Utf8,
     }
-    if "hospitalization_id" in df.columns:
+    if has_hosp_id:
         schema["hospitalization_id"] = pl.Int64
     out_df = pl.DataFrame(rows, schema=schema)
 
     out_path = output_dir / "data" / "RESP.parquet"
     out_df.write_parquet(out_path)
     print(f"  RESP -> {out_path} ({len(out_df)} events)")
+    del rows, out_df

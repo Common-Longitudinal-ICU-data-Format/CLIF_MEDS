@@ -51,6 +51,7 @@ def process_med_con(config: dict, domain_config: dict, data_dir: Path, output_di
             preferred_units=preferred_units,
             override=override,
         )
+        del vitals_pdf
         print(f"  Unit conversion summary:\n{counts_df.to_string(index=False)}")
     else:
         # No conversion — fill fallback columns so code spec still resolves
@@ -59,6 +60,7 @@ def process_med_con(config: dict, domain_config: dict, data_dir: Path, output_di
 
     # --- Convert to Polars and strip timezone ---
     df = strip_tz(pl.from_pandas(med_pdf))
+    del med_pdf
     df = normalize_categories(df)
 
     # --- Join hospitalization table for subject_id if needed ---
@@ -131,6 +133,9 @@ def process_med_con(config: dict, domain_config: dict, data_dir: Path, output_di
                 row_out["hospitalization_id"] = int(row_dict["hospitalization_id"])
             rows.append(row_out)
 
+    has_hosp_id = "hospitalization_id" in df.columns
+    del df
+
     schema = {
         "subject_id": pl.Int64,
         "time": pl.Datetime,
@@ -138,10 +143,11 @@ def process_med_con(config: dict, domain_config: dict, data_dir: Path, output_di
         "numeric_value": pl.Float32,
         "text_value": pl.Utf8,
     }
-    if "hospitalization_id" in df.columns:
+    if has_hosp_id:
         schema["hospitalization_id"] = pl.Int64
     out_df = pl.DataFrame(rows, schema=schema)
 
     out_path = output_dir / "data" / "MED_CON.parquet"
     out_df.write_parquet(out_path)
     print(f"  MED_CON -> {out_path} ({len(out_df)} events)")
+    del rows, out_df
