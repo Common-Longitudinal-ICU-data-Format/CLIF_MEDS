@@ -31,7 +31,7 @@ def process_crrt(config: dict, domain_config: dict, data_dir: Path, output_dir: 
     df = normalize_categories(df)
 
     # Drop unused columns
-    for col_name in ("device_id", "dialysis_machine_name", "__index_level_0__"):
+    for col_name in ("device_id", "dialysis_machine_name"):
         if col_name in df.columns:
             df = df.drop(col_name)
 

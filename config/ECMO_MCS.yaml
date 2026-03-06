@@ -2,9 +2,46 @@ elf_version: "1.0.0"
 subject_id_col: patient_id
 
 ecmo_mcs:
-  ecmo_mcs:
-    code: ECMO_MCS//ecmo_mcs//UNK//presence
+  # --- Categorical concepts (2) ---
+  device_category:
+    code: [ECMO_MCS, device_category, col(device_category)]
     time: col(recorded_dttm)
     time_format: "%Y-%m-%d %H:%M:%S"
-    numeric_value: 1
+    text_value: device_name
+    hospitalization_id: hospitalization_id
+
+  mcs_group:
+    code: [ECMO_MCS, mcs_group, col(mcs_group)]
+    time: col(recorded_dttm)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    text_value: device_metric_name
+    hospitalization_id: hospitalization_id
+
+  # --- Numeric concepts (4) ---
+  device_rate:
+    code: ECMO_MCS//device_rate
+    time: col(recorded_dttm)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    numeric_value: device_rate
+    hospitalization_id: hospitalization_id
+
+  sweep:
+    code: ECMO_MCS//sweep
+    time: col(recorded_dttm)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    numeric_value: sweep
+    hospitalization_id: hospitalization_id
+
+  flow:
+    code: ECMO_MCS//flow
+    time: col(recorded_dttm)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    numeric_value: flow
+    hospitalization_id: hospitalization_id
+
+  fdO2:
+    code: ECMO_MCS//fdO2
+    time: col(recorded_dttm)
+    time_format: "%Y-%m-%d %H:%M:%S"
+    numeric_value: fdO2
     hospitalization_id: hospitalization_id

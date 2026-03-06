@@ -30,10 +30,6 @@ def process_ecmo_mcs(config: dict, domain_config: dict, data_dir: Path, output_d
     del ecmo_pdf
     df = normalize_categories(df)
 
-    # Drop unused columns
-    for col_name in ("device_name", "device_metric_name", "__index_level_0__"):
-        if col_name in df.columns:
-            df = df.drop(col_name)
 
     # Collect columns referenced in concept mappings
     needed_cols = set()
@@ -81,13 +77,10 @@ def process_ecmo_mcs(config: dict, domain_config: dict, data_dir: Path, output_d
             numeric_value = None
             text_value = None
             if "numeric_value" in concept_mapping:
-                nv_spec = concept_mapping["numeric_value"]
-                if isinstance(nv_spec, (int, float)):
-                    numeric_value = float(nv_spec)
-                else:
-                    nv = row_dict.get(nv_spec)
-                    if nv is not None:
-                        numeric_value = float(nv)
+                nv_col = concept_mapping["numeric_value"]
+                nv = row_dict.get(nv_col)
+                if nv is not None:
+                    numeric_value = float(nv)
             if "text_value" in concept_mapping:
                 tv = row_dict.get(concept_mapping["text_value"])
                 if tv is not None:
