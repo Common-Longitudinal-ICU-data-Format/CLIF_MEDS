@@ -27,6 +27,8 @@ subject_id_col: patient_id
 
 meds:
   output_format: parquet
+  output_mode: domain          # "domain" (one file per domain) or "shards" (subject-partitioned)
+  subjects_per_shard: 1000     # only used when output_mode is "shards"
   split_ratios:
     train: 0.7
     tuning: 0.15

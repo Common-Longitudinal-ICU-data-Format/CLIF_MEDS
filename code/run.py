@@ -7,9 +7,10 @@ from pathlib import Path
 
 import yaml
 
-from code.config import ensure_output_dirs, get_enabled_domains, load_config
+from code.config import ensure_output_dirs, get_enabled_domains, get_output_mode, get_subjects_per_shard, load_config
 from code.metadata import write_codes_parquet
 from code.process import DOMAIN_PROCESSORS
+from code.shard import shard_data
 
 
 def main():
@@ -53,6 +54,11 @@ def main():
         print(f"Processing {domain}...")
         DOMAIN_PROCESSORS[domain](config, domain_config, data_dir, output_dir)
         gc.collect()
+
+    output_mode = get_output_mode(config)
+    if output_mode == "shards":
+        subjects_per_shard = get_subjects_per_shard(config)
+        shard_data(output_dir, subjects_per_shard)
 
     write_codes_parquet(output_dir, domain_versions)
 

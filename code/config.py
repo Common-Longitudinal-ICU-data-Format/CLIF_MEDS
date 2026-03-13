@@ -22,3 +22,13 @@ def ensure_output_dirs(output_dir: Path):
 def get_enabled_domains(config: dict) -> list[str]:
     """Return list of domain names where value == 1."""
     return [domain for domain, enabled in config["domains"].items() if enabled == 1]
+
+
+def get_output_mode(config: dict) -> str:
+    """Return 'domain' (default) or 'shards'."""
+    return config.get("meds", {}).get("output_mode", "domain")
+
+
+def get_subjects_per_shard(config: dict) -> int:
+    """Return subjects per shard (default 1000)."""
+    return int(config.get("meds", {}).get("subjects_per_shard", 1000))
