@@ -3,6 +3,7 @@ from pathlib import Path
 
 import polars as pl
 from clifpy.utils.io import load_data
+from clifpy.utils.unit_converter import convert_dose_units_by_med_category
 from tqdm import tqdm
 
 from code.config import _CONFIG_META_KEYS
@@ -11,7 +12,7 @@ from code.transforms import normalize_categories, strip_tz
 
 
 def process_med_int(config: dict, domain_config: dict, data_dir: Path, output_dir: Path):
-    """MED_INT processor: load intermittent meds, emit MEDS parquet."""
+    """MED_INT processor: load intermittent meds, convert units via clifpy, emit MEDS parquet."""
     filetype = config["filetype"]
     site_tz = config.get("timezone")
     subject_id_col = domain_config.get("subject_id_col", config.get("subject_id_col", "patient_id"))
@@ -27,6 +28,43 @@ def process_med_int(config: dict, domain_config: dict, data_dir: Path, output_di
         table_format_type=filetype,
         site_tz=site_tz,
     )
+
+    # --- Extract unit_conversion config from the first (only) concept mapping ---
+    mapping = next(iter(concepts.values()))
+    uc_config = mapping.get("unit_conversion", {})
+    enabled = uc_config.get("enabled", False)
+    override = uc_config.get("override", False)
+    preferred_units = uc_config.get("preferred_units", {})
+    allow_other_meds = uc_config.get("allow_other_meds", True)
+
+    if enabled and preferred_units:
+        # Filter out meds not in preferred_units if allow_other_meds is False
+        if not allow_other_meds:
+            allowed = set(preferred_units.keys())
+            before = len(med_pdf)
+            med_pdf = med_pdf[med_pdf["med_category"].isin(allowed)]
+            print(f"  MED_INT filter: {before} -> {len(med_pdf)} rows ({before - len(med_pdf)} discarded)")
+
+        # Load vitals for patient weights (ASOF join inside clifpy)
+        vitals_pdf = load_data(
+            table_name="vitals",
+            table_path=str(data_dir),
+            table_format_type=filetype,
+            site_tz=site_tz,
+        )
+
+        med_pdf, counts_df = convert_dose_units_by_med_category(
+            med_df=med_pdf,
+            vitals_df=vitals_pdf,
+            preferred_units=preferred_units,
+            override=override,
+        )
+        del vitals_pdf
+        print(f"  Unit conversion summary:\n{counts_df.to_string(index=False)}")
+    else:
+        # No conversion — fill fallback columns so code spec still resolves
+        med_pdf["med_dose_converted"] = med_pdf["med_dose"]
+        med_pdf["med_dose_unit_converted"] = "UNK"
 
     # --- Convert to Polars and strip timezone ---
     df = strip_tz(pl.from_pandas(med_pdf))
@@ -70,6 +108,9 @@ def process_med_int(config: dict, domain_config: dict, data_dir: Path, output_di
         subject_id = row_dict[subject_id_col]
 
         for concept_name, concept_mapping in concepts.items():
+            if concept_name == "unit_conversion":
+                continue
+
             code = resolve_code(concept_mapping["code"], row_dict)
 
             time_spec = concept_mapping.get("time")

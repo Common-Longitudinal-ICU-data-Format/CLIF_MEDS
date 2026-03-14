@@ -35,8 +35,16 @@ def process_med_con(config: dict, domain_config: dict, data_dir: Path, output_di
     enabled = uc_config.get("enabled", False)
     override = uc_config.get("override", False)
     preferred_units = uc_config.get("preferred_units", {})
+    allow_other_meds = uc_config.get("allow_other_meds", True)
 
     if enabled and preferred_units:
+        # Filter out meds not in preferred_units if allow_other_meds is False
+        if not allow_other_meds:
+            allowed = set(preferred_units.keys())
+            before = len(med_pdf)
+            med_pdf = med_pdf[med_pdf["med_category"].isin(allowed)]
+            print(f"  MED_CON filter: {before} -> {len(med_pdf)} rows ({before - len(med_pdf)} discarded)")
+
         # Load vitals for patient weights (ASOF join inside clifpy)
         vitals_pdf = load_data(
             table_name="vitals",
